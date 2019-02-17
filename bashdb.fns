@@ -100,3 +100,45 @@ else
     _msg "Please specify a numeric line number"
 fi
 }
+
+# List breakpoints and break conditions
+function _listbp
+{
+    if [ -n "$_linebp" ]; then
+        _msg "Breakpoints at lines: ${_linebp[*]}"
+    else
+        _msg "No breakpoints have been set"
+    fi
+    _msg "Break on condition:"
+    _msg "$_brcond"
+}
+
+# Clear individual or all breakpoints
+function _clearbp
+{
+    local i bps
+    
+    # If there are no arguments, then delete all the breakpoints.
+    # Otherwise, check to see if the argument was a positive 
+    # If it wasn't, then print an error message. If it was, 
+    # echo all of the current breakpoints except the passed 
+    # and assign them to a local variable. (We need to do 
+    # assigning them back to _linebp would keep the array 
+    # size and just move the values "back" one place, resulting 
+    # duplicate value). Then destroy the old array and assign 
+    # elements of the local array, so we effectively recreate 
+    # minus the passed breakpoint.
+
+if [ -z "$1" ]; then
+     unset _linebp[*]
+     _msg "All breakpoints have been cleared"
+elif [ $(echo $1 | grep '^[0-9]*') ]; then
+     bps=($(echo $(for i in ${_linebp[*]}; do
+        if (( $1 != $i )); then echo $i; fi; done))) 
+     unset _linebp[*]
+     _linebp=(${bps[*]})
+     _msg "Breakpoint cleared at line $1"
+else
+    _msg "Please specify a numeric line number"
+fi
+}
